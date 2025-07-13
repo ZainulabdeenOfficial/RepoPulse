@@ -1,10 +1,14 @@
-name: Deploy to Vercel
+# This workflow is disabled - using Vercel's built-in GitHub integration instead
+# To enable automatic deployments, connect your GitHub repository in Vercel dashboard
+
+name: Deploy to Vercel (Disabled)
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+  # Disabled - using Vercel's built-in GitHub integration
+  # push:
+  #   branches: [ main, master ]
+  # pull_request:
+  #   branches: [ main, master ]
 
 jobs:
   deploy:
@@ -14,17 +18,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Setup Python
-      uses: actions/setup-python@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        python-version: '3.9'
+        node-version: '18'
+    
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
     
     - name: Deploy to Vercel
-      uses: amondnet/vercel-action@v25
-      with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.ORG_ID }}
-        vercel-project-id: ${{ secrets.PROJECT_ID }}
-        vercel-args: '--prod'
+      run: vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --yes
       env:
-        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }} 
+        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        VERCEL_ORG_ID: ${{ secrets.ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.PROJECT_ID }} 
