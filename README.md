@@ -173,4 +173,4 @@ MIT License - feel free to use and modify as needed.
 
 ---
 
-**Note**: This application uses GitHub's public API and respects rate limits. For higher limits, consider using a GitHub personal access token. 
+**Note**: This application uses GitHub's public API and respects rate limits. For higher limits, consider using a GitHub personal access token.
