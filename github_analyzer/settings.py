@@ -24,7 +24,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '.vercel.app',
     '.now.sh',
-    '.vercel.com'
+    '.vercel.com',
+    'repo-pulse.vercel.app',
+    'repopulse.vercel.app'
 ]
 
 # Add any custom domain if provided
@@ -134,4 +136,12 @@ LOGGING = {
         'handlers': ['console'],
         'level': 'INFO',
     },
-} 
+}
+
+# Vercel specific settings
+if os.getenv('VERCEL'):
+    # Ensure static files are served correctly
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    
+    # Add Vercel domain to allowed hosts
+    ALLOWED_HOSTS.append('*.vercel.app') 
