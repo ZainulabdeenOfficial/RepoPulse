@@ -171,6 +171,6 @@ MIT License - feel free to use and modify as needed.
 - [Chart.js Documentation](https://www.chartjs.org/)
 - [Bootstrap Documentation](https://getbootstrap.com/)
 
----
 
-**Note**: This application uses GitHub's public API and respects rate limits. For higher limits, consider using a GitHub personal access token.
+
+
