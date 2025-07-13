@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}About - GitHub Project Analyzer{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold mb-4">About GitHub Project Analyzer</h1>
+                <p class="lead text-muted">
+                    AI-powered insights to help open source developers improve and grow their repositories.
+                </p>
+            </div>
+
+            <div class="card mb-5">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        <i class="fas fa-rocket me-2 text-primary"></i>Our Mission
+                    </h3>
+                    <p class="card-text">
+                        We believe that every open source project has the potential to make a significant impact. 
+                        Our mission is to provide developers with the tools and insights they need to improve their 
+                        repositories, attract contributors, and build thriving communities.
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Popularity Prediction</h5>
+                            <p class="card-text">
+                                Analyze stars, forks, and engagement metrics to predict future growth potential 
+                                and identify opportunities for improvement.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Maintainer Activity</h5>
+                            <p class="card-text">
+                                Track commit frequency, response times, and community engagement to assess 
+                                project health and maintainer dedication.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-5">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        <i class="fas fa-cogs me-2 text-info"></i>How It Works
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="mb-3">
+                                <i class="fas fa-search fa-2x text-primary"></i>
+                            </div>
+                            <h6>1. Input Repository</h6>
+                            <p class="small text-muted">Enter your GitHub repository URL</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="mb-3">
+                                <i class="fas fa-brain fa-2x text-success"></i>
+                            </div>
+                            <h6>2. AI Analysis</h6>
+                            <p class="small text-muted">Our algorithms analyze multiple metrics</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="mb-3">
+                                <i class="fas fa-chart-bar fa-2x text-warning"></i>
+                            </div>
+                            <h6>3. Get Insights</h6>
+                            <p class="small text-muted">Receive detailed reports and recommendations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-5">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        <i class="fas fa-code me-2 text-warning"></i>Technology Stack
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Backend</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fab fa-python me-2"></i>Python 3.8+</li>
+                                <li><i class="fab fa-python me-2"></i>Django 4.2</li>
+                                <li><i class="fas fa-database me-2"></i>SQLite/PostgreSQL</li>
+                                <li><i class="fas fa-robot me-2"></i>Scikit-learn</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Frontend</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fab fa-html5 me-2"></i>HTML5</li>
+                                <li><i class="fab fa-css3-alt me-2"></i>CSS3</li>
+                                <li><i class="fab fa-js me-2"></i>JavaScript</li>
+                                <li><i class="fab fa-bootstrap me-2"></i>Bootstrap 5</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">
+                        <i class="fas fa-heart me-2 text-danger"></i>Open Source
+                    </h3>
+                    <p class="card-text">
+                        This project is open source and available on GitHub. We welcome contributions from 
+                        the community to help improve the analyzer and add new features.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="https://github.com" class="btn btn-outline-primary">
+                            <i class="fab fa-github me-2"></i>View on GitHub
+                        </a>
+                        <a href="{% url 'analyzer:api_docs' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-code me-2"></i>API Documentation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepoPulse - Real-time Analysis</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #2d3748;
+            --secondary-color: #4a5568;
+            --accent-color: #3182ce;
+            --success-color: #38a169;
+            --warning-color: #d69e2e;
+            --danger-color: #e53e3e;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7fafc;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--accent-color) !important;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 0;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .score-card {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 20px;
+        }
+        
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .score-circle:hover {
+            transform: scale(1.05);
+        }
+        
+        .score-excellent { background: linear-gradient(135deg, #38a169, #48bb78); }
+        .score-good { background: linear-gradient(135deg, #3182ce, #4299e1); }
+        .score-fair { background: linear-gradient(135deg, #d69e2e, #ecc94b); }
+        .score-poor { background: linear-gradient(135deg, #e53e3e, #f56565); }
+        
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .metric-stars { background: linear-gradient(135deg, #ffc107, #ffb300); }
+        .metric-forks { background: linear-gradient(135deg, #17a2b8, #138496); }
+        .metric-watchers { background: linear-gradient(135deg, #007bff, #0056b3); }
+        .metric-issues { background: linear-gradient(135deg, #dc3545, #c82333); }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3182ce, #4299e1);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2c5aa0, #3182ce);
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+        
+        .error-message {
+            color: #e53e3e;
+            background-color: #fed7d7;
+            border: 1px solid #feb2b2;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .success-message {
+            color: #38a169;
+            background-color: #c6f6d5;
+            border: 1px solid #9ae6b4;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .analysis-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .analysis-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .analysis-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .analysis-body {
+            padding: 2rem;
+        }
+        
+        .recommendation-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid #007bff;
+            transition: all 0.3s ease;
+        }
+        
+        .recommendation-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        /* Improvement Suggestions Styles */
+        .recommendation-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .recommendation-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .priority-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .priority-high {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .priority-medium {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .priority-low {
+            background: #28a745;
+            color: white;
+        }
+        
+        .actions-list {
+            margin-top: 0.5rem;
+        }
+        
+        .action-item {
+            padding: 0.25rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .improvement-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .improvement-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .improvement-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .improvement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .improvement-meta {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .steps-list {
+            margin-top: 0.75rem;
+        }
+        
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .step-number {
+            background: #007bff;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+        
+        .step-text {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .text-purple {
+            color: #6f42c1 !important;
+        }
+        
+        .bg-purple {
+            background-color: #6f42c1 !important;
+        }
+        
+        /* NEW: Unique Features Styles */
+        .insight-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .insight-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .insight-success {
+            border-left: 4px solid #28a745;
+        }
+        
+        .insight-warning {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .insight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .health-factors {
+            margin-top: 1rem;
+        }
+        
+        .health-factor {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .health-factor:last-child {
+            border-bottom: none;
+        }
+        
+        .maturity-info {
+            text-align: center;
+        }
+        
+        .trend-list {
+            margin-top: 1rem;
+        }
+        
+        .trend-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .trend-item:last-child {
+            border-bottom: none;
+        }
+        
+        .competitor-list {
+            margin-top: 1rem;
+        }
+        
+        .competitor-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .competitor-item:last-child {
+            border-bottom: none;
+        }
+        
+        .risk-list {
+            margin-top: 1rem;
+        }
+        
+        .risk-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .risk-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .risk-high {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .risk-medium {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .risk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        .opportunity-list {
+            margin-top: 1rem;
+        }
+        
+        .opportunity-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .opportunity-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .opportunity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 2rem 0;
+            }
+            
+            .score-circle {
+                width: 100px;
+                height: 100px;
+                font-size: 1.5rem;
+            }
+            
+            .metric-card {
+                padding: 1rem;
+            }
+            
+            .analysis-body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fab fa-github me-2"></i>RepoPulse
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#compare">
+                            <i class="fas fa-balance-scale me-1"></i>Compare
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">
+                            <i class="fas fa-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#api">
+                            <i class="fas fa-code me-1"></i>API
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="hero-section">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6">
+                        <h1 class="display-4 fw-bold mb-4">
+                            Analyze Your GitHub Repository
+                        </h1>
+                        <p class="lead mb-4">
+                            Get real-time insights to improve your open source project. 
+                            Analyze popularity, maintainer activity, and contribution guides using live GitHub data.
+                        </p>
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                <span>Real-time Data</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-chart-line text-info me-2"></i>
+                                <span>Live Analysis</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-users text-success me-2"></i>
+                                <span>Smart Suggestions</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-body p-4">
+                                <h4 class="card-title mb-4">
+                                    <i class="fab fa-github me-2"></i>Start Analysis
+                                </h4>
+                                
+                                <form id="analysisForm">
+                                    <div class="mb-3">
+                                        <label for="repositoryUrl" class="form-label">GitHub Repository URL</label>
+                                        <input type="url" class="form-control" id="repositoryUrl" 
+                                               placeholder="https://github.com/username/repository-name" required>
+                                        <div class="form-text">Enter the full GitHub repository URL</div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary w-100" id="analyzeBtn">
+                                        <span class="loading me-2">
+                                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                                        </span>
+                                        <i class="fas fa-search me-2"></i>Analyze Repository
+                                    </button>
+                                </form>
+                                
+                                <div class="text-center mt-3">
+                                    <div id="rateLimitInfo">
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Analysis takes 10-30 seconds using real GitHub data
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results" class="py-5" style="display: none;">
+            <div class="container">
+                <!-- Results will be dynamically populated -->
+            </div>
+        </section>
+
+        <!-- Compare Section -->
+        <section id="compare" class="py-5">
+            <div class="container">
+                <div class="row text-center mb-5">
+                    <div class="col-12">
+                        <h2 class="fw-bold">Compare Repositories</h2>
+                        <p class="lead text-muted">Side-by-side analysis of multiple GitHub repositories</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="card">
+                            <div class="card-body p-4">
+                                <h4 class="card-title mb-4">
+                                    <i class="fas fa-balance-scale me-2"></i>Repository Comparison
+                                </h4>
+                                
+                                <form id="comparisonForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="repo1Url" class="form-label">Repository 1</label>
+                                            <input type="url" class="form-control" id="repo1Url" 
+                                                   placeholder="https://github.com/username/repo1" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="repo2Url" class="form-label">Repository 2</label>
+                                            <input type="url" class="form-control" id="repo2Url" 
+                                                   placeholder="https://github.com/username/repo2" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="comparisonType" class="form-label">Comparison Type</label>
+                                        <select class="form-select" id="comparisonType">
+                                            <option value="overall">Overall Performance</option>
+                                            <option value="popularity">Popularity & Engagement</option>
+                                            <option value="activity">Development Activity</option>
+                                            <option value="community">Community Health</option>
+                                            <option value="maturity">Project Maturity</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary w-100" id="compareBtn">
+                                        <span class="loading me-2">
+                                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                                        </span>
+                                        <i class="fas fa-balance-scale me-2"></i>Compare Repositories
+                                    </button>
+                                </form>
+                                
+                                <div class="text-center mt-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Comparison takes 20-60 seconds for comprehensive analysis
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Comparison Results -->
+                <div id="comparisonResults" class="mt-5" style="display: none;">
+                    <!-- Results will be dynamically populated -->
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-5 bg-light">
+            <div class="container">
+                <div class="row text-center mb-5">
+                    <div class="col-12">
+                        <h2 class="fw-bold">About RepoPulse</h2>
+                        <p class="lead text-muted">The most comprehensive GitHub repository analysis tool</p>
+                    </div>
+                </div>
+                
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-rocket fa-3x text-primary"></i>
+                                </div>
+                                <h5 class="card-title">Our Mission</h5>
+                                <p class="card-text">
+                                    To provide developers and project maintainers with comprehensive, 
+                                    actionable insights that help improve their GitHub repositories 
+                                    and grow their open source communities.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-chart-line fa-3x text-success"></i>
+                                </div>
+                                <h5 class="card-title">Advanced Analytics</h5>
+                                <p class="card-text">
+                                    Using sophisticated algorithms and AI-powered insights to analyze 
+                                    repository health, maturity, trends, and competitive positioning 
+                                    in the open source ecosystem.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-users fa-3x text-info"></i>
+                                </div>
+                                <h5 class="card-title">Community Focused</h5>
+                                <p class="card-text">
+                                    Built for the open source community, helping maintainers improve 
+                                    their projects and contributors find meaningful ways to participate 
+                                    in the ecosystem.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-5">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title text-center mb-4">How It Works</h4>
+                                <div class="row">
+                                    <div class="col-md-3 text-center mb-3">
+                                        <div class="step-circle bg-primary text-white">
+                                            <i class="fas fa-search"></i>
+                                        </div>
+                                        <h6 class="mt-2">1. Input Repository</h6>
+                                        <p class="text-muted small">Enter any public GitHub repository URL</p>
+                                    </div>
+                                    <div class="col-md-3 text-center mb-3">
+                                        <div class="step-circle bg-success text-white">
+                                            <i class="fas fa-cogs"></i>
+                                        </div>
+                                        <h6 class="mt-2">2. Analyze Data</h6>
+                                        <p class="text-muted small">We fetch and analyze real-time GitHub data</p>
+                                    </div>
+                                    <div class="col-md-3 text-center mb-3">
+                                        <div class="step-circle bg-warning text-white">
+                                            <i class="fas fa-brain"></i>
+                                        </div>
+                                        <h6 class="mt-2">3. Generate Insights</h6>
+                                        <p class="text-muted small">AI-powered analysis provides deep insights</p>
+                                    </div>
+                                    <div class="col-md-3 text-center mb-3">
+                                        <div class="step-circle bg-info text-white">
+                                            <i class="fas fa-lightbulb"></i>
+                                        </div>
+                                        <h6 class="mt-2">4. Get Recommendations</h6>
+                                        <p class="text-muted small">Actionable improvement suggestions</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Documentation Section -->
+        <section id="api" class="py-5">
+            <div class="container">
+                <div class="row text-center mb-5">
+                    <div class="col-12">
+                        <h2 class="fw-bold">API Documentation</h2>
+                        <p class="lead text-muted">Programmatic access to GitHub repository analysis</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-code me-2"></i>REST API Endpoints
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="api-endpoint mb-4">
+                                    <h6 class="text-primary">GET /api/analyze</h6>
+                                    <p class="text-muted">Analyze a single repository</p>
+                                    <div class="bg-light p-3 rounded">
+                                        <code>GET /api/analyze?repo=owner/repository</code>
+                                    </div>
+                                    <div class="mt-2">
+                                        <strong>Parameters:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li><code>repo</code> - Repository in format "owner/repository"</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="api-endpoint mb-4">
+                                    <h6 class="text-primary">GET /api/compare</h6>
+                                    <p class="text-muted">Compare two repositories</p>
+                                    <div class="bg-light p-3 rounded">
+                                        <code>GET /api/compare?repo1=owner1/repo1&repo2=owner2/repo2&type=overall</code>
+                                    </div>
+                                    <div class="mt-2">
+                                        <strong>Parameters:</strong>
+                                        <ul class="list-unstyled ms-3">
+                                            <li><code>repo1</code> - First repository</li>
+                                            <li><code>repo2</code> - Second repository</li>
+                                            <li><code>type</code> - Comparison type (overall, popularity, activity, community, maturity)</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="api-endpoint mb-4">
+                                    <h6 class="text-primary">GET /api/health</h6>
+                                    <p class="text-muted">Get repository health score</p>
+                                    <div class="bg-light p-3 rounded">
+                                        <code>GET /api/health?repo=owner/repository</code>
+                                    </div>
+                                </div>
+                                
+                                <div class="api-endpoint mb-4">
+                                    <h6 class="text-primary">GET /api/maturity</h6>
+                                    <p class="text-muted">Get project maturity assessment</p>
+                                    <div class="bg-light p-3 rounded">
+                                        <code>GET /api/maturity?repo=owner/repository</code>
+                                    </div>
+                                </div>
+                                
+                                <div class="api-endpoint mb-4">
+                                    <h6 class="text-primary">GET /api/trends</h6>
+                                    <p class="text-muted">Get trend analysis</p>
+                                    <div class="bg-light p-3 rounded">
+                                        <code>GET /api/trends?repo=owner/repository</code>
+                                    </div>
+                                </div>
+                                
+                                <div class="api-endpoint mb-4">
+                                    <h6 class="text-primary">GET /api/competitors</h6>
+                                    <p class="text-muted">Get competitor analysis</p>
+                                    <div class="bg-light p-3 rounded">
+                                        <code>GET /api/competitors?repo=owner/repository</code>
+                                    </div>
+                                </div>
+                                
+                                <div class="api-endpoint mb-4">
+                                    <h6 class="text-primary">GET /api/risks</h6>
+                                    <p class="text-muted">Get risk assessment</p>
+                                    <div class="bg-light p-3 rounded">
+                                        <code>GET /api/risks?repo=owner/repository</code>
+                                    </div>
+                                </div>
+                                
+                                <div class="api-endpoint mb-4">
+                                    <h6 class="text-primary">GET /api/opportunities</h6>
+                                    <p class="text-muted">Get growth opportunities</p>
+                                    <div class="bg-light p-3 rounded">
+                                        <code>GET /api/opportunities?repo=owner/repository</code>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Response Format</h6>
+                                    <p class="mb-0">All API endpoints return JSON responses with the following structure:</p>
+                                    <pre class="mt-2"><code>{
+  "success": true,
+  "data": { ... },
+  "timestamp": "2024-01-01T00:00:00Z",
+  "rate_limit": {
+    "remaining": 60,
+    "reset": 1640995200
+  }
+}</code></pre>
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Rate Limits</h6>
+                                    <p class="mb-0">API requests are subject to GitHub's rate limits. Unauthenticated requests are limited to 60 requests per hour.</p>
+                                </div>
+                                
+                                <div class="text-center mt-4">
+                                    <a href="#" class="btn btn-outline-primary me-2" onclick="testAPI()">
+                                        <i class="fas fa-play me-2"></i>Test API
+                                    </a>
+                                    <a href="#" class="btn btn-outline-secondary" onclick="downloadAPIDocs()">
+                                        <i class="fas fa-download me-2"></i>Download Docs
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>RepoPulse</h5>
+                    <p class="mb-0">Analyze and improve your GitHub repositories with real-time insights.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">
+                        <i class="fab fa-github me-2"></i>
+                        <a href="https://github.com" class="text-light text-decoration-none">GitHub</a>
+                        <span class="mx-2">|</span>
+                        <i class="fas fa-code me-2"></i>
+                        <a href="#api" class="text-light text-decoration-none">API Docs</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html> 

@@ -1,0 +1,28 @@
+{
+  "builds": [
+    {
+      "src": "github_analyzer/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "github_analyzer/wsgi.py"
+    }
+  ],
+  "env": {
+    "PYTHONPATH": ".",
+    "DJANGO_SETTINGS_MODULE": "github_analyzer.settings"
+  },
+  "functions": {
+    "github_analyzer/wsgi.py": {
+      "maxDuration": 30
+    }
+  },
+  "buildCommand": "bash build_files.sh"
+} 

@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}API Documentation - GitHub Project Analyzer{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold mb-3">API Documentation</h1>
+                <p class="lead text-muted">
+                    Programmatic access to GitHub repository analysis
+                </p>
+            </div>
+
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        The GitHub Project Analyzer API provides programmatic access to repository analysis. 
+                        All endpoints return JSON responses and support real-time analysis without any database storage.
+                    </p>
+                    <div class="alert alert-info">
+                        <strong>Base URL:</strong> <code>{{ request.scheme }}://{{ request.get_host }}</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-search me-2"></i>Analyze Repository
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Endpoint</h6>
+                    <code>POST /api/analyze/</code>
+                    
+                    <h6 class="mt-3">Request Body</h6>
+                    <pre><code>{
+  "owner": "username",
+  "repo": "repository-name"
+}</code></pre>
+                    
+                    <h6 class="mt-3">Example Request</h6>
+                    <pre><code>curl -X POST {{ request.scheme }}://{{ request.get_host }}/api/analyze/ \
+  -H "Content-Type: application/json" \
+  -d '{"owner": "django", "repo": "django"}'</code></pre>
+                    
+                    <h6 class="mt-3">Response</h6>
+                    <pre><code>{
+  "owner": "django",
+  "repo_name": "django",
+  "full_name": "django/django",
+  "description": "The Web framework for perfectionists with deadlines.",
+  "stars": 65000,
+  "forks": 28000,
+  "watchers": 2800,
+  "open_issues": 150,
+  "open_pulls": 45,
+  "popularity_score": 85.5,
+  "maintainer_activity_score": 92.3,
+  "contribution_guide_score": 78.9,
+  "overall_score": 87.2,
+  "popularity_prediction": "High growth potential...",
+  "maintainer_activity_analysis": "Maintainer activity level: Very High...",
+  "contribution_guide_analysis": "Found: README file, contributing guide...",
+  "recommendations": [
+    "Great job! Your repository is well-maintained...",
+    "Consider adding more detailed documentation..."
+  ],
+  "github_url": "https://github.com/django/django",
+  "language": "Python",
+  "topics": ["python", "django", "web-framework"],
+  "languages": {"Python": 85, "HTML": 10, "CSS": 5}
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error Responses
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>400 Bad Request</h6>
+                    <pre><code>{
+  "error": "Owner and repo parameters are required"
+}</code></pre>
+                    
+                    <h6 class="mt-3">404 Not Found</h6>
+                    <pre><code>{
+  "error": "Repository not found or inaccessible"
+}</code></pre>
+                    
+                    <h6 class="mt-3">500 Internal Server Error</h6>
+                    <pre><code>{
+  "error": "Analysis failed: GitHub API rate limit exceeded"
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="card mb-5">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-code me-2"></i>Code Examples
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Python</h6>
+                    <pre><code>import requests
+
+url = "{{ request.scheme }}://{{ request.get_host }}/api/analyze/"
+data = {
+    "owner": "django",
+    "repo": "django"
+}
+
+response = requests.post(url, json=data)
+analysis = response.json()
+
+print(f"Overall Score: {analysis['overall_score']}")
+print(f"Popularity: {analysis['popularity_score']}")
+print(f"Activity: {analysis['maintainer_activity_score']}")</code></pre>
+                    
+                    <h6 class="mt-3">JavaScript</h6>
+                    <pre><code>const url = "{{ request.scheme }}://{{ request.get_host }}/api/analyze/";
+const data = {
+    owner: "django",
+    repo: "django"
+};
+
+fetch(url, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+})
+.then(response => response.json())
+.then(analysis => {
+    console.log(`Overall Score: ${analysis.overall_score}`);
+    console.log(`Popularity: ${analysis.popularity_score}`);
+    console.log(`Activity: ${analysis.maintainer_activity_score}`);
+});</code></pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>Rate Limits & Usage
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>No authentication required</li>
+                        <li><i class="fas fa-check text-success me-2"></i>No rate limits on our API</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Real-time analysis (10-30 seconds)</li>
+                        <li><i class="fas fa-check text-success me-2"></i>No data storage - privacy focused</li>
+                        <li><i class="fas fa-info text-info me-2"></i>Subject to GitHub API rate limits</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <strong>Note:</strong> Our API is subject to GitHub's API rate limits. 
+                        For higher limits, consider using a GitHub token in your requests.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

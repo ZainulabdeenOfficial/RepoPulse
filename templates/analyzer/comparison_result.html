@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}Comparison Results - GitHub Project Analyzer{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-balance-scale fa-2x me-3 text-primary"></i>
+                <div>
+                    <h1 class="h2 mb-1">Repository Comparison</h1>
+                    <p class="text-muted mb-0">{{ comparison_type|title }} Analysis</p>
+                </div>
+            </div>
+            <a href="{% url 'analyzer:compare_repositories' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Compare Another
+            </a>
+        </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-table me-2"></i>Comparison Results
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Repository</th>
+                            <th>Language</th>
+                            <th>Stars</th>
+                            <th>Forks</th>
+                            <th>Popularity</th>
+                            <th>Activity</th>
+                            <th>Contributions</th>
+                            <th>Overall</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for analysis in comparison_data %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fab fa-github me-2 text-muted"></i>
+                                    <div>
+                                        <strong>{{ analysis.full_name }}</strong>
+                                        {% if analysis.description %}
+                                            <br><small class="text-muted">{{ analysis.description|truncatechars:50 }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ analysis.language|default:"Unknown" }}</span>
+                            </td>
+                            <td>{{ analysis.stars|floatformat:0 }}</td>
+                            <td>{{ analysis.forks|floatformat:0 }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress me-2" style="width: 60px; height: 8px;">
+                                        <div class="progress-bar bg-warning" style="width: {{ analysis.popularity_score }}%"></div>
+                                    </div>
+                                    <small>{{ analysis.popularity_score }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress me-2" style="width: 60px; height: 8px;">
+                                        <div class="progress-bar bg-info" style="width: {{ analysis.maintainer_activity_score }}%"></div>
+                                    </div>
+                                    <small>{{ analysis.maintainer_activity_score }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress me-2" style="width: 60px; height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: {{ analysis.contribution_guide_score }}%"></div>
+                                    </div>
+                                    <small>{{ analysis.contribution_guide_score }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress me-2" style="width: 60px; height: 8px;">
+                                        <div class="progress-bar bg-primary" style="width: {{ analysis.overall_score }}%"></div>
+                                    </div>
+                                    <strong>{{ analysis.overall_score }}</strong>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Analysis -->
+    <div class="row">
+        {% for analysis in comparison_data %}
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fab fa-github me-2"></i>{{ analysis.full_name }}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <!-- Scores -->
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <h5 class="text-warning">{{ analysis.popularity_score }}</h5>
+                            <small class="text-muted">Popularity</small>
+                        </div>
+                        <div class="col-4">
+                            <h5 class="text-info">{{ analysis.maintainer_activity_score }}</h5>
+                            <small class="text-muted">Activity</small>
+                        </div>
+                        <div class="col-4">
+                            <h5 class="text-success">{{ analysis.contribution_guide_score }}</h5>
+                            <small class="text-muted">Contributions</small>
+                        </div>
+                    </div>
+
+                    <!-- Analysis -->
+                    <div class="mb-3">
+                        <h6>Popularity Analysis</h6>
+                        <p class="small text-muted">{{ analysis.popularity_prediction }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Activity Analysis</h6>
+                        <p class="small text-muted">{{ analysis.maintainer_activity_analysis }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>Contribution Guide</h6>
+                        <p class="small text-muted">{{ analysis.contribution_guide_analysis }}</p>
+                    </div>
+
+                    <!-- Recommendations -->
+                    {% if analysis.recommendations %}
+                    <div class="mb-3">
+                        <h6>Recommendations</h6>
+                        <ul class="list-unstyled">
+                            {% for recommendation in analysis.recommendations %}
+                                <li class="small text-muted">
+                                    <i class="fas fa-arrow-right text-primary me-1"></i>
+                                    {{ recommendation }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <!-- Actions -->
+                    <div class="d-grid">
+                        <a href="{{ analysis.github_url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                            <i class="fab fa-github me-1"></i>View on GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Summary -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-chart-bar me-2"></i>Comparison Summary
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Best Overall Score</h6>
+                    {% with best=comparison_data|dictsort:"overall_score"|last %}
+                        <p class="mb-0">
+                            <strong>{{ best.full_name }}</strong> with a score of 
+                            <span class="badge bg-primary">{{ best.overall_score }}</span>
+                        </p>
+                    {% endwith %}
+                </div>
+                <div class="col-md-6">
+                    <h6>Most Popular</h6>
+                    {% with most_popular=comparison_data|dictsort:"popularity_score"|last %}
+                        <p class="mb-0">
+                            <strong>{{ most_popular.full_name }}</strong> with 
+                            <span class="badge bg-warning">{{ most_popular.popularity_score }}</span> popularity score
+                        </p>
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

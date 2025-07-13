@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}GitHub Project Analyzer - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Analyze Your GitHub Repository
+                </h1>
+                <p class="lead mb-4">
+                    Get AI-powered insights to improve your open source project. 
+                    Analyze popularity, maintainer activity, and contribution guides.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-star text-warning me-2"></i>
+                        <span>Popularity Prediction</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-chart-line text-info me-2"></i>
+                        <span>Activity Analysis</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-users text-success me-2"></i>
+                        <span>Contribution Guide</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4">
+                            <i class="fab fa-github me-2"></i>Start Analysis
+                        </h4>
+                        
+                        <form method="post" id="analysisForm">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ form.repository_url.label_tag }}
+                                {{ form.repository_url }}
+                                {% if form.repository_url.help_text %}
+                                    <div class="form-text">{{ form.repository_url.help_text }}</div>
+                                {% endif %}
+                                {% if form.repository_url.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.repository_url.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100" id="analyzeBtn">
+                                <span class="loading me-2">
+                                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                                </span>
+                                <i class="fas fa-search me-2"></i>Analyze Repository
+                            </button>
+                        </form>
+                        
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Analysis takes 10-30 seconds depending on repository size
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="fw-bold">What We Analyze</h2>
+                <p class="lead text-muted">Comprehensive insights to help your repository grow</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-star fa-3x text-warning"></i>
+                        </div>
+                        <h5 class="card-title">Popularity Prediction</h5>
+                        <p class="card-text">
+                            Analyze stars, forks, and engagement to predict future growth potential 
+                            and identify opportunities for improvement.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line fa-3x text-info"></i>
+                        </div>
+                        <h5 class="card-title">Maintainer Activity</h5>
+                        <p class="card-text">
+                            Track commit frequency, response times, and community engagement 
+                            to assess project health and maintainer dedication.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-users fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title">Contribution Guide</h5>
+                        <p class="card-text">
+                            Check for essential documentation like README, CONTRIBUTING guides, 
+                            and templates to make your project contributor-friendly.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <i class="fas fa-chart-bar fa-3x text-primary"></i>
+                </div>
+                <h3 class="fw-bold">Real-time</h3>
+                <p class="text-muted">Instant Analysis</p>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <i class="fas fa-users fa-3x text-success"></i>
+                </div>
+                <h3 class="fw-bold">100%</h3>
+                <p class="text-muted">Free Analysis</p>
+            </div>
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <i class="fas fa-clock fa-3x text-warning"></i>
+                </div>
+                <h3 class="fw-bold">&lt;30s</h3>
+                <p class="text-muted">Average Analysis Time</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('analysisForm').addEventListener('submit', function() {
+    showLoading();
+    document.getElementById('analyzeBtn').disabled = true;
+});
+</script>
+{% endblock %} 

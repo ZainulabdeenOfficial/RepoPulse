@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+{% block title %}Analysis Results - {{ analysis.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Repository Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center mb-3">
+                <i class="fab fa-github fa-2x me-3 text-muted"></i>
+                <div>
+                    <h1 class="h2 mb-1">{{ analysis.full_name }}</h1>
+                    {% if analysis.description %}
+                        <p class="text-muted mb-0">{{ analysis.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{{ analysis.github_url }}" target="_blank" class="btn btn-outline-primary">
+                    <i class="fab fa-github me-2"></i>View on GitHub
+                </a>
+                <a href="{% url 'analyzer:index' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-plus me-2"></i>Analyze Another
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overall Score -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card score-card">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center">
+                        {% if analysis.overall_score >= 80 %}
+                            <div class="score-circle score-excellent">{{ analysis.overall_score }}</div>
+                            <h5 class="text-success">Excellent</h5>
+                        {% elif analysis.overall_score >= 60 %}
+                            <div class="score-circle score-good">{{ analysis.overall_score }}</div>
+                            <h5 class="text-primary">Good</h5>
+                        {% elif analysis.overall_score >= 40 %}
+                            <div class="score-circle score-fair">{{ analysis.overall_score }}</div>
+                            <h5 class="text-warning">Fair</h5>
+                        {% else %}
+                            <div class="score-circle score-poor">{{ analysis.overall_score }}</div>
+                            <h5 class="text-danger">Needs Improvement</h5>
+                        {% endif %}
+                        <p class="text-muted">Overall Score</p>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <h4 class="fw-bold text-warning">{{ analysis.popularity_score }}</h4>
+                                <p class="text-muted mb-0">Popularity</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <h4 class="fw-bold text-info">{{ analysis.maintainer_activity_score }}</h4>
+                                <p class="text-muted mb-0">Activity</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <h4 class="fw-bold text-success">{{ analysis.contribution_guide_score }}</h4>
+                                <p class="text-muted mb-0">Contributions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Repository Metrics -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="mb-4">Repository Metrics</h3>
+            <div class="row g-4">
+                <div class="col-md-3 col-sm-6">
+                    <div class="metric-card text-center">
+                        <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                        <h4 class="fw-bold">{{ analysis.stars|floatformat:0 }}</h4>
+                        <p class="text-muted mb-0">Stars</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="metric-card text-center">
+                        <i class="fas fa-code-branch fa-2x text-info mb-2"></i>
+                        <h4 class="fw-bold">{{ analysis.forks|floatformat:0 }}</h4>
+                        <p class="text-muted mb-0">Forks</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="metric-card text-center">
+                        <i class="fas fa-eye fa-2x text-primary mb-2"></i>
+                        <h4 class="fw-bold">{{ analysis.watchers|floatformat:0 }}</h4>
+                        <p class="text-muted mb-0">Watchers</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="metric-card text-center">
+                        <i class="fas fa-exclamation-circle fa-2x text-danger mb-2"></i>
+                        <h4 class="fw-bold">{{ analysis.open_issues|floatformat:0 }}</h4>
+                        <p class="text-muted mb-0">Open Issues</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Details -->
+    <div class="row">
+        <!-- Popularity Analysis -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-star me-2"></i>Popularity Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <h3 class="fw-bold text-warning">{{ analysis.popularity_score }}</h3>
+                        <p class="text-muted">Popularity Score</p>
+                    </div>
+                    <p class="card-text">{{ analysis.popularity_prediction }}</p>
+                    
+                    <!-- Popularity Chart -->
+                    <canvas id="popularityChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maintainer Activity -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Maintainer Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <h3 class="fw-bold text-info">{{ analysis.maintainer_activity_score }}</h3>
+                        <p class="text-muted">Activity Score</p>
+                    </div>
+                    <p class="card-text">{{ analysis.maintainer_activity_analysis }}</p>
+                    
+                    <!-- Activity Chart -->
+                    <canvas id="activityChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contribution Guide -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Contribution Guide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <h3 class="fw-bold text-success">{{ analysis.contribution_guide_score }}</h3>
+                        <p class="text-muted">Guide Score</p>
+                    </div>
+                    <p class="card-text">{{ analysis.contribution_guide_analysis }}</p>
+                    
+                    <!-- Contribution Chart -->
+                    <canvas id="contributionChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    {% if analysis.recommendations %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        {% for recommendation in analysis.recommendations %}
+                            <li class="mb-2">
+                                <i class="fas fa-arrow-right text-primary me-2"></i>
+                                {{ recommendation }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Additional Information -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Repository Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="mb-1"><strong>Language:</strong></p>
+                            <p class="mb-1"><strong>Last Updated:</strong></p>
+                            <p class="mb-1"><strong>Open PRs:</strong></p>
+                        </div>
+                        <div class="col-6">
+                            <p class="mb-1">{{ analysis.language|default:"Unknown" }}</p>
+                            <p class="mb-1">{{ analysis.last_commit_date|date:"M d, Y" }}</p>
+                            <p class="mb-1">{{ analysis.open_pulls|default:"0" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-share-alt me-2"></i>Share Analysis
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="https://twitter.com/intent/tweet?text=Check out this GitHub repository analysis: {{ analysis.full_name }}&url={{ request.build_absolute_uri }}" 
+                           target="_blank" class="btn btn-outline-primary">
+                            <i class="fab fa-twitter me-2"></i>Share on Twitter
+                        </a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" 
+                           target="_blank" class="btn btn-outline-primary">
+                            <i class="fab fa-linkedin me-2"></i>Share on LinkedIn
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Popularity Chart
+const popularityCtx = document.getElementById('popularityChart').getContext('2d');
+new Chart(popularityCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Popularity Score', 'Remaining'],
+        datasets: [{
+            data: [{{ analysis.popularity_score }}, 100 - {{ analysis.popularity_score }}],
+            backgroundColor: ['#ffc107', '#e9ecef'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+// Activity Chart
+const activityCtx = document.getElementById('activityChart').getContext('2d');
+new Chart(activityCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Activity Score', 'Remaining'],
+        datasets: [{
+            data: [{{ analysis.maintainer_activity_score }}, 100 - {{ analysis.maintainer_activity_score }}],
+            backgroundColor: ['#17a2b8', '#e9ecef'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+// Contribution Chart
+const contributionCtx = document.getElementById('contributionChart').getContext('2d');
+new Chart(contributionCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Guide Score', 'Remaining'],
+        datasets: [{
+            data: [{{ analysis.contribution_guide_score }}, 100 - {{ analysis.contribution_guide_score }}],
+            backgroundColor: ['#28a745', '#e9ecef'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+</script>
+{% endblock %} 
